@@ -1,5 +1,11 @@
 # dockerfile的学习
 
+## 什么是Dockerfile？
+
+ 	Dockerfile构建镜像的方式就目前而言是使用最为广泛的，这是一种可以自动化生成镜像的一种方式，就类似shell脚本一样，一个脚本执行完就可以将一个服务安装配置好，支持正常使用了。Dockerfile也是一样，也是由一组指令组成的文件，其中每条指令对应Linux中的一条命令，Docker程序将通过读取Dockerfile中的指令最终生成镜像。
+
+​	总结：Dockerfile=基础镜像信息+维护者信息+镜像操作指令+容器启动时执行指令
+
 ### 构建镜像
 
 在脚本目录下使用语句即可：该命令会执行Dockerfile脚本命令创建镜像，镜像名为nginx版本号v3
@@ -309,3 +315,86 @@ LABEL <key>=<value> <key>=<value> <key>=<value> ...
 ```
 LABEL org.opencontainers.image.authors="runoob"
 ```
+
+## Dockfile镜像构建
+
+构建镜像的三种方式:
+
+- Dockerfile
+- 基于已有的镜像容器进行创建
+- 基于本地模板创建
+
+### 镜像案例
+
+#### 基于Centos7的java镜像
+
+* 需要先docker pull centos:7.5.1804
+* 需要先下载jdk-8u131-linux-x64.tar.gz到当前目录下
+
+```dockerfile
+FROM centos:7.5.1804
+
+#2.指明该镜像的作者和其电子邮件
+MAINTAINER zsp
+
+#3.在构建镜像时，指定镜像的工作目录，之后的命令都是基于此工作目录，如果不存在，则会创建目录
+WORKDIR /zsp_docker/jdk
+
+#4.一个复制命令，把jdk安装文件复制到镜像中，语法：ADD <src>... <dest>,注意：jdk*.tar.gz使用的是相对路径
+ADD jdk-8u131-linux-x64.tar.gz /zsp/jdk/
+
+#5.配置环境变量
+ENV JAVA_HOME=/zsp_docker/jdk/jdk1.8.0_221
+ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+#容器启动时需要执行的命令
+#CMD ["java","-version"]
+```
+
+#### 基于alpine的java镜像
+
+* localhost:8000：本地的服务，因为服务器在本地起的，所以只能模拟一个地址下载
+
+```dockerfile
+FROM alpine:3.14
+
+ENV LANG=C.UTF-8
+
+# Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
+
+RUN ALPINE_GLIBC_BASE_URL="http://localhost:8000/" && \
+    ALPINE_GLIBC_PACKAGE_VERSION="2.33-r0" && \
+    ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
+    echo \  
+        "-----BEGIN PUBLIC KEY-----\
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ2u1KJKUu/fW4A25y9m\
+        y70AGEa/J3Wi5ibNVGNn1gT1r0VfgeWd0pUybS4UmcHdiNzxJPgoWQhV2SSW1JYu\
+        tOqKZF5QSN6X937PTUpNBjUvLtTQ1ve1fp39uf/lEXPpFpOPL88LKnDBgbh7wkCp\
+        m2KzLVGChf83MS0ShL6G9EQIAUxLm99VpgRjwqTQ/KfzGtpke1wqws4au0Ab4qPY\
+        KXvMLSPLUp7cfulWvhmZSegr5AdhNw5KNizPqCJT8ZrGvgHypXyiFvvAH5YRtSsc\
+        Zvo9GI2e2MaZyo9/lvb+LbLEJZKEQckqRj4P26gmASrZEPStwc+yqy1ShHLA0j6m\
+        1QIDAQAB\
+        -----END PUBLIC KEY-----" | sed 's/   */\n/g' > "/etc/apk/keys/sgerrand.rsa.pub" && \
+    wget \
+        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+    apk add --no-cache \
+        "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+    \
+    rm "/etc/apk/keys/sgerrand.rsa.pub" && \
+    /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 "$LANG" || true && \
+    echo "export LANG=$LANG" > /etc/profile.d/locale.sh
+
+```
+
+
+
+
+
