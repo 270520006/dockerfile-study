@@ -263,16 +263,13 @@ build: /path/to/build/dir
 也可以是相对路径，只要上下文确定就可以读取到Dockerfile。
 
 ```dockerfile
-#表示当前目录下的dir
-build: .  /dir
+#表示当前目录下的dirbuild: .  /dir
 ```
 
 设定上下文根目录，然后以该目录为准指定Dockerfile。
 
 ```yml
-build:
-   context: ../
-   dockerfile: path/of/Dockerfile
+build:   context: ../   dockerfile: path/of/Dockerfile
 ```
 
 ​	build都是一个目录，如果要指定Dockerfile文件需要在build标签的子级标签中使用dockerfile标签指定。如果同时指定image和build两个标签，那么Compose会构建镜像并且把镜像命名为image值指定的名字。
@@ -284,9 +281,7 @@ build:
 ### dockerfile
 
 ```yml
-build:
-  context: .
-  dockerfile: Dockerfile-alternate
+build:  context: .  dockerfile: Dockerfile-alternate
 ```
 
 ### commond
@@ -390,9 +385,7 @@ volumes:
 ​	从另一个服务或容器挂载其数据卷：
 
 ```yml
-volumes_from:
-  ``- service_name  
-   ``- container_name
+volumes_from:  ``- service_name     ``- container_name
 ```
 
 ### dns
@@ -400,10 +393,7 @@ volumes_from:
 ​	自定义DNS服务器。可以是一个值，也可以是一个列表。
 
 ```yml
-dns：8.8.8.8
-dns：
-    - 8.8.8.8   
-      - 9.9.9.9
+dns：8.8.8.8dns：    - 8.8.8.8         - 9.9.9.9
 ```
 
 ### expose
@@ -411,9 +401,7 @@ dns：
 ​	暴露端口，但不映射到宿主机，只允许能被连接的服务访问。仅可以指定内部端口为参数，如下所示：
 
 ```yml
-expose:
-    -   "3000"
-    -   "8000"
+expose:    -   "3000"    -   "8000"
 ```
 
 #### links
@@ -421,10 +409,7 @@ expose:
 链接到其它服务中的容器。使用服务名称（同时作为别名），或者“服务名称:服务别名”（如 SERVICE:ALIAS），例如：
 
 ```yml
-links:
-    - db
-    - db:database
-    - redis
+links:    - db    - db:database    - redis
 ```
 
 #### net
@@ -432,9 +417,7 @@ links:
 设置网络模式：
 
 ```yml
-net:   "bridge"
-net:   "none"
-net:   "host"
+net:   "bridge"net:   "none"net:   "host"
 ```
 
 
@@ -482,6 +465,36 @@ docker-compose -f compose_v.yml up -d
 * 示意图如下
 
 ![image-20211015170537161](compose_study/image-20211015170537161.png)
+
+### 自定义网络跑容器
+
+* 写docker-compose
+
+```
+version: '2'services:  web1:    image: wurstmeister/zookeeper    ports:      - "8888:2181"    container_name: "zookeeper01"    networks:      mynet03:        ipv4_address: 11.11.11.12    volumes:      -  /home/zookeeper01/zookeeper_data:/data      -  /home/zookeeper01/conf:/conf  web2:    image: wurstmeister/zookeeper    ports:      - "8887:2181"    container_name: "zookeeper02"    networks:      mynet03:        ipv4_address: 11.11.11.11    volumes:      - /home/zookeeper02/zookeeper_data:/data      - /home/zookeeper02/conf:/conf#正常写法#networks:#  dev:#    driver: bridge#  pro:#    driver: bridge#个人自定义网络使用networks:  mynet03:    driver: bridge    ipam:      config:        - subnet: 11.11.11.0/16
+```
+
+* 运行docker-compose
+
+```
+docker-compose -f  compose_zookeeper.yml up -d
+```
+
+* 查看一下容器
+
+![image-20211018171802317](compose_study/image-20211018171802317.png)
+
+* 查看一下网络情况
+
+![image-20211018171854925](compose_study/image-20211018171854925.png)
+
+* 查看自定义网络情况
+
+```shell
+docker network inspect docker-compose_mynet03
+```
+
+![image-20211018172205549](compose_study/image-20211018172205549.png)
 
 ## 防火墙命令
 
