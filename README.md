@@ -127,3 +127,6 @@ curl -o save.txt www.baidu.com
   实例1：curl -F “key=value” -F “filename=@file.tar.gz” http://localhost/upload
   其他命令
   其他命令参考：http://man.linuxde.net/curl
+  
+**使用root权限进入docker容器**
+[root@localhost store]# docker exec -it -u root  6bb7 /bin/bash
