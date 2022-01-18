@@ -128,5 +128,19 @@ curl -o save.txt www.baidu.com
   其他命令
   其他命令参考：http://man.linuxde.net/curl
   
+
 **使用root权限进入docker容器**
+
+```shell
 [root@localhost store]# docker exec -it -u root  6bb7 /bin/bash
+```
+
+**在容器外执行命令**
+
+```shell
+[root@localhost namesrv]# docker exec -it 6bb7 /bin/bash -c 'java -version'
+openjdk version "1.8.0_201"
+OpenJDK Runtime Environment (build 1.8.0_201-b09)
+OpenJDK 64-Bit Server VM (build 25.201-b09, mixed mode)
+```
+
