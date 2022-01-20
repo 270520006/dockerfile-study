@@ -144,3 +144,12 @@ OpenJDK Runtime Environment (build 1.8.0_201-b09)
 OpenJDK 64-Bit Server VM (build 25.201-b09, mixed mode)
 ```
 
+**Nacos进入容器的方法**
+
+```shell
+[root@localhost broker]#  docker exec -it 4a60 /bin/bash
+OCI runtime exec failed: exec failed: container_linux.go:349: starting container process caused "exec: \"/bin/bash\": stat /bin/bash: no such file or directory": unknown
+[root@localhost broker]#  docker exec -it 4a60 bash
+OCI runtime exec failed: exec failed: container_linux.go:349: starting container process caused "exec: \"bash\": executable file not found in $PATH": unknown
+[root@localhost broker]#  docker exec -it 4a60 sh
+```
